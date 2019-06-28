@@ -21,7 +21,7 @@ int sc_main(int argc, char* argv[]) {
   sc_signal<bool> clk;
   sc_signal<bool> rst;
   sc_signal<bool> ena;
-  sc_signal<sc_uint<4>,SC_MANY_WRITERS > cont_out{"out"};
+  sc_signal<sc_uint<4>,SC_MANY_WRITERS > cont_out;
   //sc_start();
   //prepare the simulation
   // Print the hello world
