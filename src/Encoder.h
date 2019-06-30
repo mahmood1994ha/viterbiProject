@@ -42,6 +42,9 @@ SC_MODULE (first_counter) {
       cout<<"@" << sc_time_stamp() <<" :: Incremented Counter "
         <<counter_out.read()<<endl;
     }
+    if (count == 15){
+    	sc_stop();
+    }
   } // End of function incr_count
 
   // Constructor for the counter
