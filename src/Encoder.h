@@ -43,7 +43,7 @@ SC_MODULE (first_counter) {
         <<counter_out.read()<<endl;
     }
     if (count == 15){
-    	sc_stop();
+    	//sc_stop();
     }
   } // End of function incr_count
 
@@ -59,6 +59,18 @@ SC_MODULE (first_counter) {
   } // End of Constructor
 
 }; // End of Module counter
+
+/*SC_MODULE(encoder){
+	sc_in_clk clk;
+	sc_in<bool> reset;
+	sc_in<bool> in;
+	sc_out<bool> v1,v2;
+	sc_bit polynomials[3];
+	SC_CTOR(encoder){
+
+	}
+};*/
+
 
 
 
