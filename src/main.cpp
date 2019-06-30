@@ -22,7 +22,7 @@ int sc_main(int argc, char* argv[]) {
   sc_clock clk ("clockTest",1,SC_SEC,0.5,1,SC_SEC,true);
   sc_signal<bool> rst;
   sc_signal<bool> ena;
-  sc_signal<sc_uint<4>,SC_MANY_WRITERS > cont_out{"out"};
+  sc_signal<sc_uint<4>,SC_MANY_WRITERS > cont_out;
   //sc_start();
   //prepare the simulation
   // Print the hello world
