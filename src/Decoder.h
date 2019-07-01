@@ -43,7 +43,7 @@ SC_MODULE (decoder){
 	sc_in<sc_bit> in[OUT_BUF_SIZE*2];
 	sc_out<sc_bit> out[OUT_BUF_SIZE*2];
 
-	node trellis[5][4];
+	node trellis[OUT_BUF_SIZE][4];
 
 	//number of states
 	std::vector<viterbiPath> pathList;
@@ -57,7 +57,7 @@ SC_MODULE (decoder){
 	}
 	void decoderProcess(){
 		int loopCounter = 0;
-		while (loopCounter<5){
+		while (loopCounter<OUT_BUF_SIZE){
 			int bit1 = in[loopCounter].read();
 			int bit2 = in[loopCounter+1].read();
 			int combinedInput = bit1 & (bit2<<1);
@@ -100,10 +100,43 @@ SC_MODULE (decoder){
 			}
 			loopCounter++;
 		}
+
+		int minHammingDist = 99;
+		int mLikelyPathState = -1;
+		for (int i=0;i<4;i++){
+			int temp = trellis[OUT_BUF_SIZE-1][i].nodeHammingDist;
+			if (temp<minHammingDist){
+				minHammingDist = temp;
+
+				mLikelyPathState = i;
+			}
+		}
+		cout<<"Most likely state at EOT "<<mLikelyPathState<<"\n"<<endl;
+		cout<<"least accumulated metric "<<minHammingDist <<"\n"<<endl;
+		traceMostLikelyPath(mLikelyPathState);
 	}
 
+	void traceMostLikelyPath(int stateIndex){
+		//int loopCounter==
+		//while ()
+		int stateToTrack = stateIndex;
+		int loopCounter = OUT_BUF_SIZE;
+		while (loopCounter!=0){
+			int stateToBackTrack = trellis[loopCounter][stateToTrack].winningPrvState;
+			if(stateToBackTrack == S_A){
+				stateToTrack = 0;
+			}else if (stateToBackTrack == S_B){
+				stateToTrack = 1;
+			}else if (stateToBackTrack == S_C){
+				stateToTrack = 2;
+			}else if (stateToBackTrack == S_D){
+				stateToTrack = 3;
+			}
+			cout <<"state "<<stateToBackTrack<<"\n"<<endl;
+		}
+	}
 	void createStateTable(){
-		for (int i=0;i<5;i++){
+		for (int i=0;i<OUT_BUF_SIZE;i++){
 			//initialize trellis nodes
 			//initialize first node in the column
 			trellis[i][0].lstState1 = S_A;
@@ -124,6 +157,10 @@ SC_MODULE (decoder){
 		}
 	}
 	SC_CTOR(decoder){
+		createStateTable();
+		for (;;){
+			decoderProcess();
+		}
 
 	}
 
