@@ -3,6 +3,7 @@
 #include "tlm.h"
 
 #include "Encoder.h"
+#include "Decoder.h"
 
 // Hello_world is module name
 SC_MODULE (hello_world) {
