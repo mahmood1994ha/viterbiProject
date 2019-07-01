@@ -8,19 +8,18 @@
 #include "DecTest.h"
 
 void dectest::source(){
-	sc_bit tmp[10] = {"1011000110"};
+	sc_signal<sc_bit> tmp[10];
 	//1011000110
-	/*
-	tmp[0] = 0b00;
-	tmp[1] = 0b1;
-	tmp[2] = 0b1;
-	tmp[3] = 0b0;
-	tmp[4] = 0b0;
-	tmp[5] = 0b0;
-	tmp[6] = 0b1;
-	tmp[7] = 0b1;
-	tmp[8] = 0b0;
-	tmp[9] = 0b1;*/
+	tmp[0].write(sc_bit('0'));
+	tmp[1].write(sc_bit('0'));
+	tmp[2].write(sc_bit('0'));
+	tmp[3].write(sc_bit('0'));
+	tmp[4].write(sc_bit('0'));
+	tmp[5].write(sc_bit('0'));
+	tmp[6].write(sc_bit('0'));
+	tmp[7].write(sc_bit('0'));
+	tmp[8].write(sc_bit('0'));
+	tmp[9].write(sc_bit('0'));
 
 	for(int i = 0; i < 10; i++){
 		in[i].write(tmp[i]);
@@ -29,7 +28,7 @@ void dectest::source(){
 }
 
 void dectest::sink(){
-	sc_in<sc_bit> inData[10];
+	sc_signal<sc_bit> inData[10];
 	for(int i = 0; i < 10; i++){
 		inData[i] = out[i].read();
 		wait();
