@@ -4,6 +4,7 @@
 
 #include "Encoder.h"
 #include "Decoder.h"
+#include "DecTest.h"
 
 // Hello_world is module name
 SC_MODULE (hello_world) {
@@ -16,9 +17,42 @@ SC_MODULE (hello_world) {
   }
 };
 
+SC_MODULE(SYSTEM){
+	decoder *decode;
+	dectest *dTest;
+
+	sc_signal<sc_bit> in_sig[10];
+	sc_signal<sc_bit> out_sig[10];
+	sc_clock clock_sig;
+
+	SC_CTOR(SYSTEM)
+		: clock_sig("clock_sig",10,SC_NS)
+	{
+		dTest = new dectest("dTest");
+		dTest->clock(clock_sig);
+		dTest->in(in_sig);
+		dTest->out(out_sig);
+
+		decode = new decoder("decode");
+		decode->clock(clock_sig);
+		decode->in(in_sig);
+		decode->out(out_sig);
+	}
+
+	~SYSTEM(){
+		delete decode;
+		delete dTest;
+	}
+};
+
+SYSTEM *top = NULL;
+
 // sc_main in top level function like in C++ main
 int sc_main(int argc, char* argv[]) {
-	sc_signal<bool>   clock;
+	top = new SYSTEM("top");
+	sc_start();
+	/*
+	  sc_signal<bool>   clock;
 	  sc_signal<bool>   reset;
 	  sc_signal<bool>   enable;
 	  sc_signal<sc_uint<4> > counter_out;
@@ -78,5 +112,6 @@ int sc_main(int argc, char* argv[]) {
 
 	  cout << "@" << sc_time_stamp() <<" Terminating simulation\n" << endl;
 	  sc_close_vcd_trace_file(wf);
+	  */
 	  return 0;// Terminate simulation
 }
