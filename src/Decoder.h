@@ -44,7 +44,7 @@ SC_MODULE (decoder){
 	sc_out<sc_bit> out[OUT_BUF_SIZE*2];
 
 	node trellis[OUT_BUF_SIZE][4];
-
+	sc_bit inBuffer[2*OUT_BUF_SIZE];
 	//number of states
 	std::vector<viterbiPath> pathList;
 
@@ -53,13 +53,17 @@ SC_MODULE (decoder){
 	int iterations = 2*parityNUM +1;
 	//int i=0;
 	void calculateBranchHammingDist(sc_bit receivedCode[2],sc_bit testCode[2]){
-
+	}
+	void readInput(){
+		for (int i=0;i<OUT_BUF_SIZE*2;i++){
+			inBuffer[i] = in[i].read();
+		}
 	}
 	void decoderProcess(){
 		int loopCounter = 0;
 		while (loopCounter<OUT_BUF_SIZE){
-			int bit1 = in[loopCounter].read();
-			int bit2 = in[loopCounter+1].read();
+			int bit1 = inBuffer[loopCounter];
+			int bit2 = inBuffer[loopCounter+1];
 			int combinedInput = bit1 & (bit2<<1);
 			for (int i=0;i<4;i++){
 				if (loopCounter==0){
@@ -115,12 +119,25 @@ SC_MODULE (decoder){
 		cout<<"least accumulated metric "<<minHammingDist <<"\n"<<endl;
 		traceMostLikelyPath(mLikelyPathState);
 	}
+	int getSplitBits(int combinedInput,int bitNum){
+		int retVal;
+		if (bitNum==0){
+			retVal = combinedInput&1;
+		}else if (bitNum==1){
+			retVal = combinedInput&0b10;
+		}
+		return retVal;
+	}
 
 	void traceMostLikelyPath(int stateIndex){
 		//int loopCounter==
 		//while ()
 		int stateToTrack = stateIndex;
 		int loopCounter = OUT_BUF_SIZE;
+		/*int Output =
+		int bit1 = inBuffer[loopCounter];
+		int bit2 = inBuffer[loopCounter+1];*/
+		//int combinedInput = bit1 & (bit2<<1);
 		while (loopCounter!=0){
 			int stateToBackTrack = trellis[loopCounter][stateToTrack].winningPrvState;
 			if(stateToBackTrack == S_A){
@@ -133,6 +150,7 @@ SC_MODULE (decoder){
 				stateToTrack = 3;
 			}
 			cout <<"state "<<stateToBackTrack<<"\n"<<endl;
+			loopCounter--;
 		}
 	}
 	void createStateTable(){
@@ -145,35 +163,27 @@ SC_MODULE (decoder){
 			//initialize second node
 			trellis[i][1].lstState1 = S_C;
 			trellis[i][1].lstState2 = S_D;
-			trellis[i][0].nodeHammingDist = 0;
+			trellis[i][1].nodeHammingDist = 0;
 			//intialize third node
 			trellis[i][2].lstState1 = S_A;
 			trellis[i][2].lstState2 = S_B;
-			trellis[i][0].nodeHammingDist = 0;
+			trellis[i][2].nodeHammingDist = 0;
 			//intialize fourth node
-			trellis[i][2].lstState1 = S_C;
-			trellis[i][2].lstState2 = S_D;
-			trellis[i][0].nodeHammingDist = 0;
+			trellis[i][3].lstState1 = S_C;
+			trellis[i][3].lstState2 = S_D;
+			trellis[i][3].nodeHammingDist = 0;
 		}
+	}
+	void decoderIntegration(){
+		createStateTable();
+		readInput();
+		decoderProcess();
 	}
 	SC_CTOR(decoder){
-		createStateTable();
-		for (;;){
-			decoderProcess();
-		}
-
+		SC_METHOD(decoderIntegration);
+		sensitive << clock.pos();
 	}
-
-
-
-
-
 };
-
-
-
-
-
 SC_MODULE(trellis){
 
 
