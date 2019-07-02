@@ -30,13 +30,19 @@ SC_MODULE(SYSTEM){
 	{
 		dTest = new dectest("dTest");
 		dTest->clock(clock_sig);
-		dTest->in(in_sig);
-		dTest->out(out_sig);
+		for (int i = 0; i<10; i++){
+			dTest->in[i](in_sig[i]);
+			dTest->out[i](out_sig[i]);
+		}
+
 
 		decode = new decoder("decode");
 		decode->clock(clock_sig);
-		decode->in(in_sig);
-		decode->out(out_sig);
+		for (int i = 0; i<10; i++){
+			decode->in[i](in_sig[i]);
+			decode->out[i](out_sig[i]);
+		}
+
 	}
 
 	~SYSTEM(){
