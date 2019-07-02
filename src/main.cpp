@@ -16,6 +16,7 @@ SC_MODULE (hello_world) {
     cout << "Hello World.\n";
   }
 };
+/*
 
 SC_MODULE(SYSTEM){
 	decoder *decode;
@@ -44,12 +45,13 @@ SC_MODULE(SYSTEM){
 		delete dTest;
 	}
 };
+*/
 
-SYSTEM *top = NULL;
+//SYSTEM *top = NULL;
 
 // sc_main in top level function like in C++ main
 int sc_main(int argc, char* argv[]) {
-	top = new SYSTEM("top");
+	//top = new SYSTEM("top");
 	sc_start();
 	/*
 	  sc_signal<bool>   clock;
