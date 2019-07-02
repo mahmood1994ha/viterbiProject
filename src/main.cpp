@@ -56,7 +56,7 @@ SYSTEM *top = NULL;
 // sc_main in top level function like in C++ main
 int sc_main(int argc, char* argv[]) {
 	top = new SYSTEM("top");
-	sc_start();
+	sc_start(2,SC_NS,SC_RUN_TO_TIME);
 	/*
 	  sc_signal<bool>   clock;
 	  sc_signal<bool>   reset;
