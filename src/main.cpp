@@ -16,11 +16,9 @@ SC_MODULE (hello_world) {
     cout << "Hello World.\n";
   }
 };
-/*
 
 SC_MODULE(SYSTEM){
-	decoder *decode;
-	dectest *dTest;
+
 
 	sc_signal<sc_bit> in_sig[10];
 	sc_signal<sc_bit> out_sig[10];
@@ -29,31 +27,32 @@ SC_MODULE(SYSTEM){
 	SC_CTOR(SYSTEM)
 		: clock_sig("clock_sig",10,SC_NS)
 	{
-		dTest = new dectest("dTest");
-		dTest->clock(clock_sig);
-		dTest->in(in_sig);
-		dTest->out(out_sig);
+		decoder decode("testDecoder");
+		dectest dTest("Dtest");
+		//dTest = new dectest("dTest");
+		dTest.clock(clock_sig);
+		for (int i=0;i<10;i++){
+			dTest.in[i](in_sig[i]);
+			dTest.out[i](out_sig[i]);
+		}
 
-		decode = new decoder("decode");
-		decode->clock(clock_sig);
-		decode->in(in_sig);
-		decode->out(out_sig);
-	}
 
-	~SYSTEM(){
-		delete decode;
-		delete dTest;
+		decode.clock(clock_sig);
+		for (int i=0;i<10;i++){
+			decode.in[i](in_sig[i]);
+			decode.out[i](out_sig[i]);
+		}
 	}
 };
-*/
 
-//SYSTEM *top = NULL;
+SYSTEM *top = NULL;
 
 // sc_main in top level function like in C++ main
 int sc_main(int argc, char* argv[]) {
-	//top = new SYSTEM("top");
+	top = new SYSTEM("top");
 	sc_start();
-	/*
+/*
+
 	  sc_signal<bool>   clock;
 	  sc_signal<bool>   reset;
 	  sc_signal<bool>   enable;
@@ -64,10 +63,10 @@ int sc_main(int argc, char* argv[]) {
 	  int i = 0;
 	  // Connect the DUT
 	  first_counter counter("COUNTER");
-	    counter.clock(clock);
-	    counter.reset(reset);
-	    counter.enable(enable);
-	    counter.counter_out(counter_out);
+	  counter.clock(clock);
+	  counter.reset(reset);
+	  counter.enable(enable);
+	  counter.counter_out(counter_out);
 	  //declare decoder
 	  //decoder
 	  decoderIn[0].write(sc_bit('0'));
@@ -119,6 +118,7 @@ int sc_main(int argc, char* argv[]) {
 
 	  cout << "@" << sc_time_stamp() <<" Terminating simulation\n" << endl;
 	  sc_close_vcd_trace_file(wf);
-	  */
+*/
+
 	  return 0;// Terminate simulation
 }
