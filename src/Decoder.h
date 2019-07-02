@@ -53,7 +53,6 @@ SC_MODULE (decoder){
 	int iterations = 2*parityNUM +1;
 	//int i=0;
 	void calculateBranchHammingDist(sc_bit receivedCode[2],sc_bit testCode[2]){
-
 	}
 	void decoderProcess(){
 		int loopCounter = 0;
@@ -161,19 +160,8 @@ SC_MODULE (decoder){
 		for (;;){
 			decoderProcess();
 		}
-
 	}
-
-
-
-
-
 };
-
-
-
-
-
 SC_MODULE(trellis){
 
 

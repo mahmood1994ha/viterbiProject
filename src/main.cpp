@@ -22,6 +22,9 @@ int sc_main(int argc, char* argv[]) {
 	  sc_signal<bool>   reset;
 	  sc_signal<bool>   enable;
 	  sc_signal<sc_uint<4> > counter_out;
+	  sc_signal <sc_bit> decoderIn[10];
+	  sc_signal <sc_bit> decoderOut[10];
+
 	  int i = 0;
 	  // Connect the DUT
 	  first_counter counter("COUNTER");
@@ -29,7 +32,9 @@ int sc_main(int argc, char* argv[]) {
 	    counter.reset(reset);
 	    counter.enable(enable);
 	    counter.counter_out(counter_out);
-
+	  //declare decoder
+	  //decoder
+	  decoderIn[0].write(sc_bit('0'));
 	  sc_start(1,SC_NS,SC_RUN_TO_TIME);
 
 	  // Open VCD file
