@@ -21,8 +21,8 @@ SC_MODULE(SYSTEM){
 	decoder *decode;
 	dectest *dTest;
 
-	sc_signal<sc_bit> in_sig[10];
-	sc_signal<sc_bit> out_sig[10];
+	sc_signal<sc_bit> in_sig[14];
+	sc_signal<sc_bit> out_sig[14];
 	sc_clock clock_sig;
 
 	SC_CTOR(SYSTEM)
@@ -30,7 +30,7 @@ SC_MODULE(SYSTEM){
 	{
 		dTest = new dectest("dTest");
 		dTest->clock(clock_sig);
-		for (int i = 0; i<10; i++){
+		for (int i = 0; i<14; i++){
 			dTest->in[i](in_sig[i]);
 			dTest->out[i](out_sig[i]);
 		}
@@ -38,7 +38,7 @@ SC_MODULE(SYSTEM){
 
 		decode = new decoder("decode");
 		decode->clock(clock_sig);
-		for (int i = 0; i<10; i++){
+		for (int i = 0; i<14; i++){
 			decode->in[i](in_sig[i]);
 			decode->out[i](out_sig[i]);
 		}

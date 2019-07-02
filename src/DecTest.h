@@ -12,8 +12,8 @@
 
 SC_MODULE(dectest){
 	sc_in_clk clock;
-	sc_out<sc_bit> in[10];
-	sc_in<sc_bit> out[10];
+	sc_out<sc_bit> in[14];
+	sc_in<sc_bit> out[14];
 
 	void source();
 	void sink();
