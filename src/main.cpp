@@ -3,6 +3,8 @@
 #include "tlm.h"
 
 #include "Encoder.h"
+#include "TB.h"
+#include "Monitor.h"
 #include "Decoder.h"
 #include "DecTest.h"
 
@@ -52,11 +54,44 @@ SC_MODULE(SYSTEM){
 };
 
 SYSTEM *top = NULL;
+int sc_main(int argc, char* argv[])
+{
+	sc_signal<sc_bit, SC_MANY_WRITERS> input, out1, out2,count;
+
+
+	sc_core::sc_report_handler::set_actions("/IEEE_Std_1666/deprecated",sc_core::SC_DO_NOTHING);
+
+	sc_clock TestClk("TestClock", 10, SC_NS, 0.5);
+
+	Encoder E("Encoder");
+	E.input(input);
+	E.output1(out1);
+	E.output2(out2);
+	E.count(count);
+	E.Clk(TestClk);
+
+	TB tb("TB");
+	tb.input(input);
+	tb.Clk(TestClk);
+	tb.count(count);
+
+	Monitor monitor("Monitor");
+	monitor.input(input);
+	monitor.output1(out1);
+	monitor.output2(out2);
+	monitor.Clk(TestClk);
+	monitor.count(count);
+
+	sc_start();
+
+	return 0;
+
+}
 
 // sc_main in top level function like in C++ main
-int sc_main(int argc, char* argv[]) {
-	top = new SYSTEM("top");
-	sc_start(2,SC_NS,SC_RUN_TO_TIME);
+//int sc_main(int argc, char* argv[]) {
+	//top = new SYSTEM("top");
+	//sc_start(2,SC_NS,SC_RUN_TO_TIME);
 	/*
 	  sc_signal<bool>   clock;
 	  sc_signal<bool>   reset;
@@ -119,5 +154,5 @@ int sc_main(int argc, char* argv[]) {
 	  cout << "@" << sc_time_stamp() <<" Terminating simulation\n" << endl;
 	  sc_close_vcd_trace_file(wf);
 	  */
-	  return 0;// Terminate simulation
-}
+	  //return 0;// Terminate simulation
+//}
