@@ -22,16 +22,6 @@ int sc_main(int argc, char* argv[])
 	E.count(count);
 	E.Clk(TestClk);
 
-	//decoder declaration
-	decoder dect("decoder");
-	dect.clock(TestClk);
-	for (int i=0;i<14;i++){
-		dect.in[i](decoder_in[i]);
-	}
-	for (int i=0;i<14;i++){
-		dect.out[i](decoder_out[i]);
-	}
-
 	Monitor monitor("Monitor");
 	monitor.input(input);
 	monitor.output1(out1);
@@ -43,6 +33,16 @@ int sc_main(int argc, char* argv[])
 	tb.input(input);
 	tb.Clk(TestClk);
 	tb.count(count);
+
+	//decoder declaration
+	decoder dect("decoder");
+	dect.clock(TestClk);
+	for (int i=0;i<14;i++){
+		dect.in[i](decoder_in[i]);
+	}
+	for (int i=0;i<14;i++){
+		dect.out[i](decoder_out[i]);
+	}
 
 	sc_start();
 

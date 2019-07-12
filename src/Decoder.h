@@ -49,10 +49,8 @@ struct {
 
 SC_MODULE (decoder){
 	sc_in_clk clock;
-
 	sc_in<sc_bit> in[OUT_BUF_SIZE*2];
 	sc_out<sc_bit> out[OUT_BUF_SIZE*2];
-
 	node trellis[OUT_BUF_SIZE][4];
 	sc_bit inBuffer[2*OUT_BUF_SIZE] = {
 			sc_bit('1'),
@@ -73,13 +71,8 @@ SC_MODULE (decoder){
 	//number of states
 	int inBufferCombined[OUT_BUF_SIZE];
 	std::vector<viterbiPath> pathList;
-
-
 	int numStates = 2>>parityNUM;
 	int iterations = 2*parityNUM +1;
-	//int i=0;
-	void calculateBranchHammingDist(sc_bit receivedCode[2],sc_bit testCode[2]){
-	}
 	void readInput(){
 		for (int i=0;i<OUT_BUF_SIZE*2;i++){
 			inBuffer[i] = in[i].read();
@@ -93,28 +86,24 @@ SC_MODULE (decoder){
 				continue;
 			}
 			int combinedInput = inBufferCombined[loopCounter-1];
-			cout<<",combined:"<<std::bitset<2>(combinedInput)<<"\n"<<endl;
-			//cout<<"input"
+			//cout<<",combined:"<<std::bitset<2>(combinedInput)<<"\n"<<endl;
 			int i=0;
 			for (i=0;i<4;i++){
-				int firstIncomingBranch = get_metrics(trellis[loopCounter][i].prv_out1,combinedInput);
-				int secondIncomingBranch = get_metrics(trellis[loopCounter][i].prv_out2,combinedInput);
-
-				cout<<"=======================================\n"<<endl;
+				int firstIncomingBranch = get_hamming_distance(trellis[loopCounter][i].prv_out1,combinedInput);
+				int secondIncomingBranch = get_hamming_distance(trellis[loopCounter][i].prv_out2,combinedInput);
+/*				cout<<"=======================================\n"<<endl;
 				cout<<"first incoming path cost "<< firstIncomingBranch<<"\n"<<endl;
 				cout<<"second incoming path cost "<< secondIncomingBranch<<"\n"<<endl;
-				cout<<"=======================================\n"<<endl;
+				cout<<"=======================================\n"<<endl;*/
 				int prvHammingDist1=0;
 				int prvHammingDist2=0;
-				//if (loopCounter>0){
-					prvHammingDist1 = trellis[loopCounter-1][trellis[loopCounter][i].prv_state1].nodeHammingDist;
-					prvHammingDist2 = trellis[loopCounter-1][trellis[loopCounter][i].prv_state2].nodeHammingDist;
-					cout<<"prvHD1:"<<prvHammingDist1<<" ,prvHD2:"<<prvHammingDist2<<"\n"<<endl;
-				//}
+				prvHammingDist1 = trellis[loopCounter-1][trellis[loopCounter][i].prv_state1].nodeHammingDist;
+				prvHammingDist2 = trellis[loopCounter-1][trellis[loopCounter][i].prv_state2].nodeHammingDist;
+				//cout<<"prvHD1:"<<prvHammingDist1<<" ,prvHD2:"<<prvHammingDist2<<"\n"<<endl;
 				firstIncomingBranch +=prvHammingDist1;
 				secondIncomingBranch +=prvHammingDist2;
 				if (firstIncomingBranch<secondIncomingBranch){
-					cout<<"first branch chosen\n"<<endl;
+					//cout<<"first branch chosen\n"<<endl;
 					//if the first branch has smaller hamming distance
 					trellis[loopCounter][i].winning_prv_state = trellis[loopCounter][i].prv_state1;
 					trellis[loopCounter][i].winning_prv_out = trellis[loopCounter][i].prv_out1;
@@ -123,22 +112,21 @@ SC_MODULE (decoder){
 					trellis[loopCounter][i].nodeHammingDist =firstIncomingBranch;
 				}
 				else {
-					cout<<"second branch chosen\n"<<endl;
+					//cout<<"second branch chosen\n"<<endl;
 					trellis[loopCounter][i].winning_prv_state = trellis[loopCounter][i].prv_state2;
 					trellis[loopCounter][i].winning_prv_out = trellis[loopCounter][i].prv_out2;
 					trellis[loopCounter][i].winning_prv_bit = trellis[loopCounter][i].prv_bit2;
 					//find the previous hamming dist and add the new one to it
 					trellis[loopCounter][i].nodeHammingDist = secondIncomingBranch;
 				}
-				cout<<"trellis row "<< i<<" ,col"<< loopCounter<<" ,accum hamming dist"<<trellis[loopCounter][i].nodeHammingDist<<"\n"<<endl;
-
+				//cout<<"trellis row "<< i<<" ,col"<< loopCounter<<" ,accum hamming dist"<<trellis[loopCounter][i].nodeHammingDist<<"\n"<<endl;
 			}
 
 			loopCounter = loopCounter+1;
 		}
-
 		int minHammingDist = 99;
 		int mLikelyPathState = -1;
+		cout<<"metrics at EOT\n"<<endl;
 		for (int i=0;i<4;i++){
 			int temp = trellis[OUT_BUF_SIZE-1][i].nodeHammingDist;
 			cout<<"state "<<i<<" hammingDist = "<<temp<<"\n"<<endl;
@@ -149,151 +137,10 @@ SC_MODULE (decoder){
 		}
 		int stateIndex = mLikelyPathState;
 		cout<<"least accumulated metric "<<minHammingDist <<"\n"<<endl;
-		cout<<"Most likely path at EOT: \n"<<endl;
+		cout<<"Most likely path at EOT (reversed): \n"<<endl;
 		cout<<"state "<<std::bitset<2>(stateIndex)<<"\n"<<endl;
 		traceMostLikelyPath(stateIndex);
 	}
-
-
-
-	void decoderProcess2(){
-		int loopCounter=1;
-		while (loopCounter<OUT_BUF_SIZE){
-			for (int i=0;i<4;i++){
-				int currInput = inBufferCombined[loopCounter-1];
-				int branchMetric1 = get_metrics(trellis[loopCounter][i].prv_out1,currInput);
-				int branchMetric2 = get_metrics(trellis[loopCounter][i].prv_out2,currInput);
-				int oldVal = 0;
-				if (loopCounter>0){
-					if (trellis[loopCounter][i].stateID==0){
-						int x1 = trellis[loopCounter-1][0].nodeHammingDist;
-						int x2 = trellis[loopCounter-1][1].nodeHammingDist;
-						if (x1<x2){
-							oldVal = x1;
-						}else {
-							oldVal = x2;
-						}
-					}else if (trellis[loopCounter][i].stateID==1){
-						int x1 = trellis[loopCounter-1][2].nodeHammingDist;
-						int x2 = trellis[loopCounter-1][3].nodeHammingDist;
-						if (x1<x2){
-							oldVal = x1;
-						}else {
-							oldVal = x2;
-						}
-					}else if (trellis[loopCounter][i].stateID==2){
-						int x1 = trellis[loopCounter-1][0].nodeHammingDist;
-						int x2 = trellis[loopCounter-1][1].nodeHammingDist;
-						if (x1<x2){
-							oldVal = x1;
-						}else {
-							oldVal = x2;
-						}
-					}else {
-						int x1 = trellis[loopCounter-1][2].nodeHammingDist;
-						int x2 = trellis[loopCounter-1][3].nodeHammingDist;
-						if (x1<x2){
-							oldVal = x1;
-						}else {
-							oldVal = x2;
-						}
-					}
-				}
-				if (branchMetric1<branchMetric2){
-					//declare the winning branch
-					trellis[loopCounter][i].winning_prv_state = trellis[loopCounter][i].prv_state1;
-					trellis[loopCounter][i].nodeHammingDist = branchMetric1 + oldVal;
-				}else {
-					trellis[loopCounter][i].winning_prv_state = trellis[loopCounter][i].prv_state1;
-					trellis[loopCounter][i].nodeHammingDist = branchMetric2 + oldVal;
-				}
-
-			}
-			loopCounter++;
-		}
-		int minHammingDistance = 100;
-		int mstLikelyState = -1;
-		for (int i=0;i<4;i++){
-			int temp = trellis[OUT_BUF_SIZE - 1][i].nodeHammingDist;
-			if (temp<minHammingDistance){
-				minHammingDistance = temp;
-				mstLikelyState = trellis[OUT_BUF_SIZE - 1][i].stateID;
-			}
-		}
-		traceMostLikelyPath(mstLikelyState);
-	}
-	void traceBack(int EOT_state){
-		int loopCounter ;
-		int stateBackTrack = EOT_state;
-		for (loopCounter= 0;loopCounter<OUT_BUF_SIZE;loopCounter++){
-			int oldVal = 0;
-			if (loopCounter==0){
-				stateBackTrack = 0;
-				int x1 = trellis[loopCounter+1][0].nodeHammingDist;
-				int x2 = trellis[loopCounter+1][1].nodeHammingDist;
-				if (x1<x2){
-					cout<<trellis[loopCounter+1][0].stateID;
-					oldVal = x1;
-				}else {
-					cout<<trellis[loopCounter+1][1].stateID;
-					oldVal = x2;
-				}
-			}
-			if (loopCounter>0){
-				if (stateBackTrack==0){
-					int x1 = trellis[loopCounter+1][0].nodeHammingDist;
-					int x2 = trellis[loopCounter+1][1].nodeHammingDist;
-					if (x1<x2){
-						cout<<trellis[loopCounter+1][0].stateID;
-						oldVal = x1;
-					}else {
-						cout<<trellis[loopCounter+1][1].stateID;
-						oldVal = x2;
-					}
-				}else if (stateBackTrack==1){
-					int x1 = trellis[loopCounter+1][2].nodeHammingDist;
-					int x2 = trellis[loopCounter+1][3].nodeHammingDist;
-					if (x1<x2){
-						cout<<trellis[loopCounter+1][2].stateID;
-						oldVal = x1;
-					}else {
-						cout<<trellis[loopCounter+1][3].stateID;
-						oldVal = x2;
-					}
-				}else if (stateBackTrack){
-					int x1 = trellis[loopCounter+1][0].nodeHammingDist;
-					int x2 = trellis[loopCounter+1][1].nodeHammingDist;
-					if (x1<x2){
-						cout<<trellis[loopCounter+1][0].stateID;
-						oldVal = x1;
-					}else {
-						cout<<trellis[loopCounter+1][1].stateID;
-						oldVal = x2;
-					}
-				}else {
-					int x1 = trellis[loopCounter+1][2].nodeHammingDist;
-					int x2 = trellis[loopCounter+1][3].nodeHammingDist;
-					if (x1<x2){
-						cout<<trellis[loopCounter+1][2].stateID;
-						oldVal = x1;
-					}else {
-						cout<<trellis[loopCounter+1][2].stateID;
-						oldVal = x2;
-					}
-				}
-				cout<<"\n"<<endl;
-			}
-		}
-	}
-	/*void traceForward(int EOT){
-		for (int i=0;i<OUT_BUF_SIZE;i++){
-			int temp
-			for (int j=0;i<4;j++){
-
-
-			}
-		}
-	}*/
 	int getSplitBits(int combinedInput,int bitNum){
 		int retVal;
 		if (bitNum==0){
@@ -314,7 +161,7 @@ SC_MODULE (decoder){
 			loopCounter--;
 		}
 	}
-	uint get_metrics(int val1, int val2)
+	uint get_hamming_distance(int val1, int val2)
 	{
 		unsigned int ret_val = 0;
 		unsigned int i = 0;
@@ -329,14 +176,12 @@ SC_MODULE (decoder){
 
 		return ret_val;
 	}
-
 	int combineBits(int bit1,int bit2){
 		int combinedInput = bit1;
 		combinedInput = (combinedInput<<1) | bit2;
 		return combinedInput;
 	}
 	void createStateTable(){
-		cout<<"S1"<<"   "<<"S2"<<"   "<<"S3"<<"   "<<"S4"<<"\n"<<endl;
 		for (int i=0;i<OUT_BUF_SIZE;i++){
 			//initialize trellis nodes
 			//initialize first node in the column
@@ -376,8 +221,6 @@ SC_MODULE (decoder){
 			trellis[i][3].prv_bit2 = 0b01;
 			trellis[i][3].nodeHammingDist = 0;
 		}
-
-		//memset
 	}
 
 	void joinInputArray(){
@@ -394,8 +237,9 @@ SC_MODULE (decoder){
 		//decoderProcess();
 	}
 	SC_CTOR(decoder){
-		cout<<"creating state table\n"<<endl;
+		cout<<"creating state table....\n"<<endl;
 		createStateTable();
+		cout<<"state table created\n"<<endl;
 		joinInputArray();
 		SC_METHOD(decoderIntegration);
 		sensitive << clock.pos();
