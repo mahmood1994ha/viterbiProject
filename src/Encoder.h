@@ -1,4 +1,4 @@
-#include "SystemC.h"
+#include "systemc.h"
 SC_MODULE(Encoder)          // declare encoder module
 {
 	sc_in<sc_bit> input;

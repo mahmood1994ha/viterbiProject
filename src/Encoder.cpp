@@ -4,8 +4,6 @@
 void Encoder::encode()
 {
 	sc_bit out1, out2;
-	
-	//sc_bit shiftregister;
 
 	while (1)
 
