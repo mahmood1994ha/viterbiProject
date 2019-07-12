@@ -28,7 +28,7 @@ void dectest::source(){
 
 	for(int i = 0; i < 10; i++){
 		in[i].write(tmp[i]);
-		//wait();
+		wait();
 	}
 }
 
@@ -36,10 +36,14 @@ void dectest::sink(){
 	sc_signal<sc_bit> inData[10];
 	for(int i = 0; i < 10; i++){
 		inData[i] = out[i].read();
-		wait();
+		//wait();
 		cout << i << " :/t" << inData[i] << endl;
 	}
-	sc_stop();
+	//sc_stop();
+}
+
+void bind_concrete_decoder(){
+
 }
 
 
