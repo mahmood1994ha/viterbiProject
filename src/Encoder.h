@@ -12,7 +12,7 @@ SC_MODULE(Encoder)          // declare encoder module
 	SC_CTOR(Encoder)
 	{
 		
-		shiftregister = "000";
+		shiftregister = "0000";
 		SC_THREAD(encode); //Executing the encode function
 		sensitive << count;  //sensitive to reading input data
 	}

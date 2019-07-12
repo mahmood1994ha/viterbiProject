@@ -20,17 +20,17 @@ int sc_main(int argc, char* argv[])
 	E.count(count);
 	E.Clk(TestClk);
 
+	Monitor monitor("Monitor");
+		monitor.input(input);
+		monitor.output1(out1);
+		monitor.output2(out2);
+		monitor.Clk(TestClk);
+		monitor.count(count);
+
 	TB tb("TB");
 	tb.input(input);
 	tb.Clk(TestClk);
 	tb.count(count);
-
-	Monitor monitor("Monitor");
-	monitor.input(input);
-	monitor.output1(out1);
-	monitor.output2(out2);
-	monitor.Clk(TestClk);
-	monitor.count(count);
 
 	sc_start();
 

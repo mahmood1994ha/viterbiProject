@@ -3,5 +3,5 @@
 
 void Monitor::monitor()
 {
-		cout << output1 << output2;
+	//cout <<" Input = "<<input<<" -->"<<" Output = "<<output1<<output2<<endl;
 }
